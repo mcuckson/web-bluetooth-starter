@@ -41,7 +41,7 @@ function App() {
     const device = await navigator.bluetooth.requestDevice({
       /* filters: [{ namePrefix: "KI" }], */
       /* optionalServices: ["00001818-0000-1000-8000-00805f9b34fb"], */
-      filters: [{ services: ["00001826-0000-1000-8000-00805f9b34fb"] }],
+      filters: [{ services: ["00001818-0000-1000-8000-00805f9b34fb"] }],
       //{ services: ["battery_service", "cycling_power"] }],
     });
 
