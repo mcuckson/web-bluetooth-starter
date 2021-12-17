@@ -41,11 +41,14 @@ function App() {
     const device = await navigator.bluetooth.requestDevice({
       /* filters: [{ namePrefix: "KI" }], */
       /* optionalServices: ["00001818-0000-1000-8000-00805f9b34fb"], */
-      filters: [{ services: ["00001818-0000-1000-8000-00805f9b34fb"] }],
+      filters: [{ services: ["00001826-0000-1000-8000-00805f9b34fb"] }],
       //{ services: ["battery_service", "cycling_power"] }],
     });
 
     setIsDisconnected(false);
+    var testing = new Uint16Array([66,100]);
+    console.log(testing[0]);
+    console.log(testing[1]);
 
     // Add an event listener to detect when a device disconnects
     device.addEventListener("gattserverdisconnected", onDisconnected);
@@ -60,19 +63,27 @@ function App() {
     /* const chars = await service.getCharacteristics(); */
     /* console.log(chars); */
 
-    // Get the battery level characteristic from the Bluetooth device
+    // Get the Cycling Power Control Point characteristic from the Bluetooth device
     const characteristic = await service.getCharacteristic(
-      "00002a63-0000-1000-8000-00805f9b34fb"
+      "A026E005-0A7D-4AB3-97FA-F1500F9FEB8B"
     );
+    // // write characteristic from the Bluetooth device
+    const writeCharacteristic = await characteristic.writeValue(
+      //Uint8Array([0x01, 0x42, 0x01, 0x00, 0x64, 0x64])
+      //Uint16Array([0x01, 0x42, 0x01, 0x00, 0x64, 0x64])
+      //Uint16Array.of(100)
+    );
+    
 
     // Subscribe to battery level notifications
-    characteristic.startNotifications();
-
+    characteristic.writeValue(Uint16Array([0x01, 0x42, 0x01, 0x00, 0x64, 0x64]));
+    // characteristic.startNotifications();
+    
     // When the battery level changes, call a function
-    characteristic.addEventListener(
-      "characteristicvaluechanged",
-      handleCharacteristicValueChanged
-    );
+    // characteristic.addEventListener(
+    //   "characteristicvaluechanged",
+    //   handleCharacteristicValueChanged
+    // );
 
     // Read the battery level value
     /* const reading = await characteristic.readValue(); */
