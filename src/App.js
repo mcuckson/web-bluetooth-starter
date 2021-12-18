@@ -158,9 +158,11 @@ function App() {
       </table>
 
       )}
+      
       {supportsBluetooth && isDisconnected && (
-        <button onClick={connectToDeviceAndSubscribeToUpdates}>
-          Connect to a Bluetooth device
+        
+        <button className="button" onClick={connectToDeviceAndSubscribeToUpdates}>
+        Connect - Bike Trainer
         </button>
       )}
       {!supportsBluetooth && (
