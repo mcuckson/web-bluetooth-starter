@@ -139,7 +139,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Set Target Power for Bike Over Bluetooth</h1>
+      <h1>Bike Trainer & Heart Rate App</h1>
       {supportsBluetooth && !isDisconnected && (
         <p>Target Power Level: {targetPowerLevel}</p>
       )}
