@@ -42,9 +42,10 @@ function App() {
     /* try { */
     // Search for Bluetooth devices that advertise a battery service
     const device = await navigator.bluetooth.requestDevice({
-      /* filters: [{ namePrefix: "KI" }], */
+      filters: [{ namePrefix: "KI" }],
+      optionalServices: ["00001826-0000-1000-8000-00805f9b34fb"],
       /* optionalServices: ["00001818-0000-1000-8000-00805f9b34fb"], */
-      filters: [{ services: ["00001826-0000-1000-8000-00805f9b34fb"] }],
+      /* filters: [{ services: ["00001826-0000-1000-8000-00805f9b34fb"] }], */
       //{ services: ["battery_service", "cycling_power"] }],
     });
 
@@ -57,9 +58,29 @@ function App() {
     const server = await device.gatt.connect();
 
     // Get the battery service from the Bluetooth device
+    const ids = [
+      /* "00001800-0000-1000-8000-00805f9b34fb", */
+      /* "00001801-0000-1000-8000-00805f9b34fb", */
+      /* "0000180a-0000-1000-8000-00805f9b34fb", */
+      /* "00001818-0000-1000-8000-00805f9b34fb", */
+      /* "0000181c-0000-1000-8000-00805f9b34fb", */
+      "00001826-0000-1000-8000-00805f9b34fb",
+      /* "a026ee01-0a7d-4ab3-97fa-f1500f9feb8b", */
+      /* "a026ee03-0a7d-4ab3-97fa-f1500f9feb8b", */
+      /* "a026ee06-0a7d-4ab3-97fa-f1500f9feb8b", */
+      /* "a026ee0b-0a7d-4ab3-97fa-f1500f9feb8b", */
+    ];
+    console.log("try");
+    ids.forEach(async (i) => {
+      const all = await server.getPrimaryServices(i);
+      console.log(all);
+    });
+    console.log("done");
+
     const service = await server.getPrimaryService(
       "00001826-0000-1000-8000-00805f9b34fb"
     );
+    console.log("continuing");
     /* const chars = await service.getCharacteristics(); */
     /* console.log(chars); */
 
@@ -73,68 +94,71 @@ function App() {
       "00002ad2-0000-1000-8000-00805f9b34fb"
     );
     await characteristicIndoorBikeData.startNotifications();
-    characteristicIndoorBikeData.addEventListener('characteristicvaluechanged', (event) => {
-      console.log(event)
-      let dataview = new DataView(event.target.value.buffer);
-      let flags = dataview.getUint16(0, true);
-      var i;
-      for (i = 0; i < 16; i++) {
-        console.log('flags[' + i + '] = ' + (!!(flags >>> i & 1)));
-      }
-      // console.log('Instantaneous Speed = ' + dataview.getUint16(2, true) / 100)
-      // console.log('Instantaneous Cadence = ' + dataview.getUint16(4, true) * 0.5)
-      // console.log('Instantaneous Power  = ' + dataview.getInt16(6, true))
+    characteristicIndoorBikeData.addEventListener(
+      "characteristicvaluechanged",
+      (event) => {
+        console.log(event);
+        let dataview = new DataView(event.target.value.buffer);
+        let flags = dataview.getUint16(0, true);
+        var i;
+        for (i = 0; i < 16; i++) {
+          console.log("flags[" + i + "] = " + !!((flags >>> i) & 1));
+        }
+        // console.log('Instantaneous Speed = ' + dataview.getUint16(2, true) / 100)
+        // console.log('Instantaneous Cadence = ' + dataview.getUint16(4, true) * 0.5)
+        // console.log('Instantaneous Power  = ' + dataview.getInt16(6, true))
 
-      setSpeed(dataview.getUint16(2, true) / 100);
-      setCadence(dataview.getUint16(4, true) * 0.5);
-      setPower(dataview.getInt16(6, true));
-      //THIS MIGHT WORK ON A REAL BIKE - BUT NOT ON SIMULATOR console.log('Heart Rate  = ' + dataview.getUint8(8, true))
-    });
+        setSpeed(dataview.getUint16(2, true) / 100);
+        setCadence(dataview.getUint16(4, true) * 0.5);
+        setPower(dataview.getInt16(6, true));
+        //THIS MIGHT WORK ON A REAL BIKE - BUT NOT ON SIMULATOR console.log('Heart Rate  = ' + dataview.getUint8(8, true))
+      }
+    );
 
     ////////////////////
-  
+
     function requestControl() {
-          const OpCode = 0x00;
-          let buffer   = new ArrayBuffer(1);
-          let view     = new DataView(buffer);
-          view.setUint8(0, OpCode, true);
-  
-          return view;
+      const OpCode = 0x00;
+      let buffer = new ArrayBuffer(1);
+      let view = new DataView(buffer);
+      view.setUint8(0, OpCode, true);
+
+      return view;
     }
-  
+
     function powerTarget(args) {
-        const OpCode = 0x05;
-        const power = args.power;
+      const OpCode = 0x05;
+      const power = args.power;
 
-        const buffer = new ArrayBuffer(3);
-        const view   = new DataView(buffer);
-        view.setUint8( 0, OpCode, true);
-        view.setUint16(1, power,  true);
+      const buffer = new ArrayBuffer(3);
+      const view = new DataView(buffer);
+      view.setUint8(0, OpCode, true);
+      view.setUint16(1, power, true);
 
-        return view;
+      return view;
     }
 
-  
     await characteristic.startNotifications();
-    characteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
-  
+    characteristic.addEventListener(
+      "characteristicvaluechanged",
+      handleCharacteristicValueChanged
+    );
+
     await characteristic.writeValue(requestControl());
-  
+
     let power = 100;
     setTargetPowerLevel(power);
-    await characteristic.writeValue(powerTarget({power}));
-  
-    setInterval(async function() {
-        if(power === 120) {
-            power = 200;
+    await characteristic.writeValue(powerTarget({ power }));
 
-        } else {
-            power = 120;
-        }
-        setTargetPowerLevel(power);
-        await characteristic.writeValue(powerTarget({power}));
+    setInterval(async function () {
+      if (power === 100) {
+        power = 200;
+      } else {
+        power = 250;
+      }
+      setTargetPowerLevel(power);
+      await characteristic.writeValue(powerTarget({ power }));
     }, 15000);
-
   };
 
   return (
@@ -144,25 +168,26 @@ function App() {
         <p>Target Power Level: {targetPowerLevel}</p>
       )}
       {supportsBluetooth && !isDisconnected && (
-      <table>
-      <tr>
-        <th>Speed</th>
-        <th>Cadence</th>
-        <th>Power</th>
-      </tr>
-        <tr>
-          <td>{speed}</td>
-          <td>{cadence}</td>
-          <td>{power}</td>
-        </tr>
-      </table>
-
+        <table>
+          <tr>
+            <th>Speed</th>
+            <th>Cadence</th>
+            <th>Power</th>
+          </tr>
+          <tr>
+            <td>{speed}</td>
+            <td>{cadence}</td>
+            <td>{power}</td>
+          </tr>
+        </table>
       )}
-      
+
       {supportsBluetooth && isDisconnected && (
-        
-        <button className="button" onClick={connectToDeviceAndSubscribeToUpdates}>
-        Connect - Bike Trainer
+        <button
+          className="button"
+          onClick={connectToDeviceAndSubscribeToUpdates}
+        >
+          Connect - Bike Trainer
         </button>
       )}
       {!supportsBluetooth && (
