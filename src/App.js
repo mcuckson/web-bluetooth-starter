@@ -56,27 +56,6 @@ function App() {
 
     // Try to connect to the remote GATT Server running on the Bluetooth device
     const server = await device.gatt.connect();
-
-    // Get the battery service from the Bluetooth device
-    const ids = [
-      /* "00001800-0000-1000-8000-00805f9b34fb", */
-      /* "00001801-0000-1000-8000-00805f9b34fb", */
-      /* "0000180a-0000-1000-8000-00805f9b34fb", */
-      /* "00001818-0000-1000-8000-00805f9b34fb", */
-      /* "0000181c-0000-1000-8000-00805f9b34fb", */
-      "00001826-0000-1000-8000-00805f9b34fb",
-      /* "a026ee01-0a7d-4ab3-97fa-f1500f9feb8b", */
-      /* "a026ee03-0a7d-4ab3-97fa-f1500f9feb8b", */
-      /* "a026ee06-0a7d-4ab3-97fa-f1500f9feb8b", */
-      /* "a026ee0b-0a7d-4ab3-97fa-f1500f9feb8b", */
-    ];
-    console.log("try");
-    ids.forEach(async (i) => {
-      const all = await server.getPrimaryServices(i);
-      console.log(all);
-    });
-    console.log("done");
-
     const service = await server.getPrimaryService(
       "00001826-0000-1000-8000-00805f9b34fb"
     );
